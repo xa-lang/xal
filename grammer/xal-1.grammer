@@ -1,0 +1,99 @@
+Program : Sequence
+
+Sequence : (PreprocessorStatement | Statement) (Sequence)*
+
+PreprocessorStatement : DefinePreprocessor | IncludePreprocessor | ConditionalPreprocessor
+
+Statement : DeclarationStatement | DefinitionStatement | Assignment | Call | Expression
+
+DefinePreprocessor : DefineDirective Identifier Replacement NEWLINE
+
+IncludePreprocessor : INCLUDE_DIRECTIVE (StdInclude | PathInclude)
+
+ConditionalPreprocessor : IF_DIRECTIVE Sequence (ELSE_DIRECTIVE Sequence (ELIF_DIRECTIVE Sequence )*)* ENDIF_DIRECTIVE
+
+DeclarationStatement : VariableDeclaration | FunctionDeclaration
+
+DefinitionStatement : FunctionDefinition
+
+Assignment : Identifier = Expression
+
+Call : StdCall | FunctionCall | GotoCall | ReturnCall | AssertCall | ExitCall
+
+Expression : Term | Term Operator Expression
+
+DefineDirective : ("@define" | "@def")
+
+Identifier : [a-zA-Z][a-zA-Z0-9]*
+
+Replacement : Expression | Identifier
+
+NEWLINE = "\n"
+
+INCLUDE_DIRECTIVE : "@include"
+
+StdInclude : STD_FILE_PATH
+
+PathInclude : NORMAL_FILE_PATH
+
+IF_DIRECTIVE : "@ifdef"
+
+ELSE_DIRECTIVE : "@else"
+
+ELIF_DIRECTIVE : "@elif"
+
+ENDIF_DIRECTIVE : "@endif"
+
+VariableDeclaration : "let" (Identifier | Identifier ("," | Identifier)*)+
+
+FunctionDeclaration : "func" Identifier Tuple
+
+FunctionDefinition : "func" Identifier Tuple Block
+
+StdCall : StdOut | StdIn
+
+FunctionCall : Identifier Tuple
+
+GotoCall : GOTO Identifier
+
+ReturnCall : RETURN (Expression)*
+
+AssertCall : ASSERT Expression
+
+ExitCall : EXIT Expression
+
+Term : Factor | Factor Operator Term
+
+Operator : ExponentOperator | MultiplicativeOperator | AdditiveOperator
+
+STD_FILE_PATH : (?:[\w.-]+(?:\\|\/)?)+
+
+NORMAL_FILE_PATH : ^(?:[a-zA-Z]:\\|\/)? STD_FILE_PATH $
+
+Tuple : "(" Args ")"
+
+Block : "{" Sequence "}"
+
+StdOut : "sout" << (NUMBER | Identifier)
+
+StdIn : "sin" >> Identifier
+
+GOTO : "goto"
+
+RETURN : ("return" | "ret") (Expression)*1
+
+ASSERT : "assert" Expression
+
+EXIT : "exit" NUMBER
+
+Factor : NUMBER | Identifier | ("(" Expression ")") | FunctionCall
+
+ExponentOperator : "^"
+
+MultiplicativeOperator : "*" | "/"
+
+AdditiveOperator : "+" | "-"
+
+Args : Expression | Expression "," Args
+
+NUMBER : [0-9]+
